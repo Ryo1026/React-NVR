@@ -1,38 +1,146 @@
-.App {
-  text-align: center;
+* {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+html {
+  height: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+body {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  flex-direction: row;
+  margin: 0;
+  height: 100%;
+  scrollbar-base-color: #000;
+  scrollbar-face-color: rgb(53, 53, 53);
+  /* scrollbar-3dlight-color: #000; */
+  scrollbar-highlight-color: #000;
+  scrollbar-track-color: #000;
+  scrollbar-arrow-color: rgb(53, 53, 53);
+  scrollbar-shadow-color: #000;
+  /* scrollbar-dark-shadow-color: #000; */
+}
+
+iframe {
+  border: 1px solid transparent;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+ul {
+  list-style: none;
+  margin: 2px;
+  padding-left: 0;
+}
+
+li {
+  list-style: none;
+}
+
+.aui-camera-channel-body {
+  width: 243px;
   color: white;
+  background: black;
+  min-height: 270px;
 }
 
-.App-link {
-  color: #61dafb;
+.aui-camera-channel-bar {
+  cursor: pointer;
+  user-select: none;
+  -ms-user-select: none;
+  color: #e1e1e1;
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0.03rem;
+  background: linear-gradient(rgb(98, 98, 98), rgb(45, 45, 45));
+  padding: 2px 4px;
+  height: 16px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.aui-camera-channel-bar:hover {
+  background: linear-gradient(rgb(210, 146, 54), rgb(190, 110, 25));
+}
+
+.aui-tree-area {
+  flex-grow: 1;
+  min-height: 230px;
+}
+
+.tree-node-main-node {
+  display: flex;
+  height: 22px;
+}
+
+.toggle-icon {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background: url(./img/Tree.png) 0 0;
+}
+
+.toggle-icon:hover {
+  background: url(./img/Tree.png) -20px 0;
+}
+
+.expand {
+  background: url(./img/Tree.png) -40px 0;
+}
+
+.expand:hover {
+  background: url(./img/Tree.png) -60px 0;
+}
+
+.folder-icon {
+  width: 20px;
+  background: url(./img/Tree.png) 0 -20px;
+}
+
+.node-text {
+  cursor: pointer;
+  user-select: none;
+  -ms-user-select: none;
+  flex-grow: 1;
+  height: 22px;
+  line-height: 20px;
+  font-size: 14px;
+  padding: 0 7px;
+  margin-right: 20px;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.node-text:hover {
+  color: #f8a900;
+  border: 1px solid #c0761d;
+  background: rgba(192, 118, 29, 0.2);
+}
+
+.node-text:focus {
+  border: 1px solid rgb(192, 118, 29);
+  background: rgb(77, 47, 12);
+}
+
+.node-text.selected {
+  border: 1px solid rgb(192, 118, 29);
+  background: rgb(77, 47, 12);
+}
+
+.layer-2 {
+  padding: 0 0 0 20px;
+}
+
+.node-record {
+  width: 20px;
+  height: 20px;
+  margin-right: 3px;
+}
+
+.camera-icon {
+  width: 20px;
+  background: url(./img/Device-ACTi.png) 0 -40px;
 }
