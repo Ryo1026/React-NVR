@@ -4,10 +4,13 @@ import "./index.css";
 import DeviceTree from "./DeviceTree";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
+import rootReducer from "./reducers/rootReducer";
+
+let store = createStore(rootReducer);
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider store={store}>
     <DeviceTree />
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById("root")
 );
