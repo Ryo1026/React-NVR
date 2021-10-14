@@ -9,3 +9,7 @@ export function focusDeviceId(id) {
 export function getDevices(devicesInfo) {
   return { type: "GET_DEVICES", devicesInfo: devicesInfo };
 }
+
+export function dragDevice(deviceName) {
+  return { type: "DRAG_DEVICE", deviceName: deviceName };
+}

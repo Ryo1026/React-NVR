@@ -2,6 +2,7 @@ const initStore = {
   folderOpen: true,
   focusDeviceId: null,
   devicesInfo: [],
+  dragDevice: "",
 };
 
 const rootReducer = (state = initStore, action) => {
@@ -12,6 +13,8 @@ const rootReducer = (state = initStore, action) => {
       return { ...state, focusDeviceId: action.deviceId };
     case "GET_DEVICES":
       return { ...state, devicesInfo: action.devicesInfo };
+    case "DRAG_DEVICE":
+      return { ...state, dragDevice: action.deviceName };
     default:
       return state;
   }
