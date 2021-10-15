@@ -67,6 +67,22 @@ class DeviceTreeUI extends React.Component {
     }
     getDataAndDispatch();
   }
+  dragEvent = (e, onDeviceDrag) => {
+    const dragDiv = document.getElementById("dragDiv");
+    dragDiv.style.top = e.clientY + 5 + "px";
+    dragDiv.style.left = e.clientX + 5 + "px";
+    const mouseMoveEvent = function (e) {
+      dragDiv.style.top = e.clientY + 5 + "px";
+      dragDiv.style.left = e.clientX + 5 + "px";
+    };
+    const mouseUpEvent = function () {
+      document.body.removeEventListener("mousemove", mouseMoveEvent);
+      document.body.removeEventListener("mouseup", mouseUpEvent);
+      onDeviceDrag("");
+    };
+    document.body.addEventListener("mousemove", mouseMoveEvent);
+    document.body.addEventListener("mouseup", mouseUpEvent);
+  };
   render() {
     const {
       devicesInfo,
@@ -146,32 +162,7 @@ class DeviceTreeUI extends React.Component {
                           }}
                           onMouseDown={(e) => {
                             onDeviceDrag(`${i + 1} ${v.name}`);
-                            const dragDiv = document.getElementById("dragDiv");
-                            dragDiv.style.top = e.clientY + 5 + "px";
-                            dragDiv.style.left = e.clientX + 5 + "px";
-                            const mouseMoveEvent = function (e) {
-                              dragDiv.style.top = e.clientY + 5 + "px";
-                              dragDiv.style.left = e.clientX + 5 + "px";
-                            };
-                            const mouseUpEvent = function () {
-                              document.body.removeEventListener(
-                                "mousemove",
-                                mouseMoveEvent
-                              );
-                              document.body.removeEventListener(
-                                "mouseup",
-                                mouseUpEvent
-                              );
-                              onDeviceDrag("");
-                            };
-                            document.body.addEventListener(
-                              "mousemove",
-                              mouseMoveEvent
-                            );
-                            document.body.addEventListener(
-                              "mouseup",
-                              mouseUpEvent
-                            );
+                            this.dragEvent(e, onDeviceDrag);
                           }}
                         >
                           {i + 1 + " " + v.name}
