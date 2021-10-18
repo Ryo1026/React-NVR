@@ -173,3 +173,12 @@ li {
 #dragDiv.hidden {
   display: none;
 }
+
+.aui-titlebar {
+  background: url(./img/header.png);
+  min-height: 32px;
+  color: #dc8b49;
+  font-size: 13px;
+  line-height: 32px;
+  padding-left: 5px;
+}
