@@ -13,3 +13,7 @@ export function getDevices(devicesInfo) {
 export function dragDevice(deviceName) {
   return { type: "DRAG_DEVICE", deviceName: deviceName };
 }
+
+export function changeView(view) {
+  return { type: "CHANGE_VIEW", view: view };
+}

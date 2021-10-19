@@ -6,6 +6,10 @@ html {
   height: 100%;
 }
 
+#root {
+  width: 100%;
+}
+
 body {
   display: flex;
   flex-direction: row;
@@ -43,9 +47,26 @@ li {
 
 .myApp {
   height: 100%;
+  display: flex;
+}
+
+.aui-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.aui-titlebar {
+  background: url(./img/header.png);
+  min-height: 32px;
+  color: #dc8b49;
+  font-size: 13px;
+  line-height: 32px;
+  padding-left: 5px;
 }
 
 .aui-camera-channel-body {
+  flex-grow: 1;
   width: 243px;
   color: white;
   background: black;
@@ -174,11 +195,224 @@ li {
   display: none;
 }
 
-.aui-titlebar {
+.live-view-body {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.live-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: url(./img/header.png);
-  min-height: 32px;
-  color: #dc8b49;
-  font-size: 13px;
-  line-height: 32px;
-  padding-left: 5px;
+  height: 32px;
+  padding-top: 3px;
+  width: 100%;
+}
+
+.control-bar-left {
+  display: flex;
+  margin-left: 10px;
+  align-items: center;
+}
+
+.windows-size {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+.windows-x1 {
+  width: 100%;
+  height: 100%;
+  background: url(./img/Layout-icon.png) 0 -240px;
+  margin-right: 2px;
+}
+
+.windows-x4 {
+  width: 100%;
+  height: 100%;
+  background: url(./img/Layout-icon.png) 0 -300px;
+  margin-right: 2px;
+}
+
+.windows-x1-x5 {
+  width: 100%;
+  height: 100%;
+  background: url(./img/Layout-icon.png) 0 -420px;
+  margin-right: 2px;
+}
+
+.windows-x1:hover {
+  background: url(./img/Layout-icon.png) -30px -240px;
+}
+
+.windows-x4:hover {
+  background: url(./img/Layout-icon.png) -30px -300px;
+}
+
+.windows-x1-x5:hover {
+  background: url(./img/Layout-icon.png) -30px -420px;
+}
+
+.actived {
+  background-position-x: -90px;
+}
+
+.settingGear {
+  cursor: pointer;
+  width: 26px;
+  height: 30px;
+  background: url(./img/Options-ContextMenu-icon.png) 0 -570px;
+}
+
+.settingGear:hover {
+  background: url(./img/Options-ContextMenu-icon.png) -26px -570px;
+}
+
+.live-view-area {
+  display: flex;
+  height: 100%;
+  position: relative;
+  /* display: grid;
+  grid-template-areas:
+    "window1 window1 window2"
+    "window1 window1 window3"
+    "window4 window5 window6"; */
+}
+
+.hide {
+  display: none;
+}
+
+.nvr-window {
+  background: url(./img/control.jpg);
+  background-size: 100% 100%;
+  border: 2px solid rgb(67, 67, 67);
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 1;
+}
+
+.nvr-window.selected {
+  border: 2px solid rgb(220, 139, 73);
+}
+
+.window-No0 {
+  /* grid-area: window1; */
+  width: calc(100% / 3 * 2);
+  height: calc(100% / 3 * 2);
+  left: 0;
+}
+.window-No1 {
+  width: calc(100% / 3 * 1);
+  height: calc(100% / 3 * 1);
+  left: calc(100% / 3 * 2);
+}
+.window-No2 {
+  width: calc(100% / 3 * 1);
+  height: calc(100% / 3 * 1);
+  left: calc(100% / 3 * 2);
+  top: calc(100% / 3 * 1);
+}
+.window-No3 {
+  width: calc(100% / 3 * 1);
+  height: calc(100% / 3 * 1);
+  left: 0;
+  top: calc(100% / 3 * 2);
+}
+.window-No4 {
+  width: calc(100% / 3 * 1);
+  height: calc(100% / 3 * 1);
+  left: calc(100% / 3 * 1);
+  top: calc(100% / 3 * 2);
+}
+.window-No5 {
+  width: calc(100% / 3 * 1);
+  height: calc(100% / 3 * 1);
+  left: calc(100% / 3 * 2);
+  top: calc(100% / 3 * 2);
+}
+
+.window-No0.x1 {
+  width: 100%;
+  height: 100%;
+}
+.window-No1.x1 {
+  display: none;
+}
+.window-No2.x1 {
+  display: none;
+}
+.window-No3.x1 {
+  display: none;
+}
+.window-No4.x1 {
+  display: none;
+}
+.window-No5.x1 {
+  display: none;
+}
+
+.window-No0.x4 {
+  width: 50%;
+  height: 50%;
+}
+.window-No1.x4 {
+  width: 50%;
+  height: 50%;
+  left: 50%;
+}
+.window-No2.x4 {
+  width: 50%;
+  height: 50%;
+  top: 50%;
+  left: 0%;
+}
+.window-No3.x4 {
+  width: 50%;
+  height: 50%;
+  top: 50%;
+  left: 50%;
+}
+.window-No4.x4 {
+  display: none;
+}
+.window-No5.x4 {
+  display: none;
+}
+
+.live-view-footer {
+  background: url(./img/footer.png);
+  height: 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.volume-area {
+  width: 150px;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.volume-icon {
+  width: 26px;
+  height: 10px;
+  background: url(./img/footer-volume-icon.png) 6px 0px no-repeat;
+}
+
+.mute {
+  background: url(./img/footer-volume-icon.png) 6px -10px no-repeat;
+}
+
+.volume-block {
+  width: 120px;
+  height: 5px;
+  border: 1px solid #555;
+  padding: 1px;
+  background: linear-gradient(to right, #555 50%, transparent 51%);
 }

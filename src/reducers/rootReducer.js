@@ -3,6 +3,7 @@ const initStore = {
   focusDeviceId: null,
   devicesInfo: [],
   dragDevice: "",
+  view: "x1x5",
 };
 
 const rootReducer = (state = initStore, action) => {
@@ -15,6 +16,8 @@ const rootReducer = (state = initStore, action) => {
       return { ...state, devicesInfo: action.devicesInfo };
     case "DRAG_DEVICE":
       return { ...state, dragDevice: action.deviceName };
+    case "CHANGE_VIEW":
+      return { ...state, view: action.view };
     default:
       return state;
   }

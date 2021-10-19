@@ -3,6 +3,7 @@ import "./App.css";
 import DeviceTree from "./components/DeviceTree";
 import DragDiv from "./components/DragDiv";
 import TitleBar from "./components/TitleBar";
+import LiveViewBody from "./components/LiveViewBody";
 
 class MyApp extends React.Component {
   render() {
@@ -12,6 +13,7 @@ class MyApp extends React.Component {
           <TitleBar />
           <DeviceTree />
         </div>
+        <LiveViewBody />
         <DragDiv />
       </div>
     );
