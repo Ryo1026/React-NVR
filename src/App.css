@@ -299,6 +299,20 @@ li {
   border: 2px solid rgb(220, 139, 73);
 }
 
+.aui-nvr-ui-WebAssemblyController {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.aui-nvr-ui-WebAssemblyController > video {
+  display: none;
+}
+
+.aui-nvr-ui-WebAssemblyController > canvas {
+  position: absolute;
+}
+
 .window-No0 {
   /* grid-area: window1; */
   width: calc(100% / 3 * 2);

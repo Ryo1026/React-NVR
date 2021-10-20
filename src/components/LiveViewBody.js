@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { changeView } from "../actions/actionCreator";
 import { connect } from "react-redux";
 
@@ -16,6 +16,75 @@ const mapDispatchToProps = (dispatch) => {
 
 class LiveViewBodyUI extends React.Component {
   componentDidMount() {
+    let streamFragment = null;
+    let pvtWebGLAdapterModule = null;
+    let controllers = [];
+    let init = false;
+    function initializeController() {
+      if (!init && streamFragment != null && pvtWebGLAdapterModule != null) {
+        for (let i = 0; i < 6; i++) {
+          let mdlid = i + 1;
+          const fragObj = streamFragment.createFragmentObject(mdlid);
+          fragObj.createWorker(
+            streamFragment.URL_FRAGWORKER + "?v=" + new Date().getTime()
+          );
+          controllers[i] = new window.aui.nvr.ui.WebAssemblyController({
+            object: fragObj,
+            sessionKey: new Date().getTime(),
+            events: [
+              "onchange",
+              "onclick",
+              "ondblclick",
+              "onkeydown",
+              "onkeypress",
+              "onkeyup",
+              "onmousedown",
+              "onmousemove",
+              "onmouseover",
+              "onmouseup",
+              "onmouseout",
+              "onselect",
+              "onsubmit",
+              "oncontextmenu",
+            ],
+            id: mdlid,
+          });
+          // controller.push(controller1);
+          controllers[i].setWebGLAdapter(pvtWebGLAdapterModule);
+          controllers[i].render(
+            document.getElementsByClassName(`window-No${i}`)[0]
+          );
+          controllers[i].setControlMode("live");
+          controllers[i].setConnectionSettings({
+            Mode: "0",
+            MountingType: "",
+            account: "admin",
+            cameraID: "1",
+            command: "",
+            fisheyeModule: "-1",
+            mode: "live",
+            mousePTZ: "1",
+            password: "123456",
+            printLog: "",
+            serverIP: "localhost",
+            serverPort: "80",
+            setChannel: "1",
+            streamID: "1",
+            stretchToFit: "true",
+          });
+          // controllers[i].connect();
+          // controllers[i].setWidth(
+          //   document.getElementsByClassName(`window-No${i}`)[0].clientWidth
+          // );
+          // controllers[i].setHeight(
+          //   document.getElementsByClassName(`window-No${i}`)[0].clientHeight
+          // );
+          // controllers[i].setTitleBarDisplay(false);
+        }
+        init = true;
+        console.log(controllers);
+      }
+    }
     async function fetchWebAssembly() {
       await fetch("codebase/FragmentModule.wasm", { cache: "no-cache" })
         .then((res) => res.arrayBuffer())
@@ -23,15 +92,19 @@ class LiveViewBodyUI extends React.Component {
           const fragmentModule = new window.aui.nvr.WebAssemblyStreamFragment(
             buffer
           );
+          fragmentModule.onModuleEvent.subscribe(function (type, args) {
+            let eventType = args[0] || "";
+            switch (eventType) {
+              case "onRuntimeInitialized":
+                streamFragment = fragmentModule;
+                initializeController();
+                break;
+              default:
+                break;
+            }
+          });
           window.Fragment(fragmentModule);
-          console.log("fragmentModule", fragmentModule);
-
-          // const fragObj = fragmentModule.createFragmentObject(1);
-          // console.log(fragObj);
-          // const controller = new window.aui.nvr.ui.WebAssemblyController({
-          //   object: fragObj,
-          //   sessionKey: new Date().getTime(),
-          // });
+          // console.log("fragmentModule", fragmentModule);
         });
       await fetch("codebase/WebGLAdapterModule.wasm", {
         cache: "no-cache",
@@ -41,7 +114,20 @@ class LiveViewBodyUI extends React.Component {
           const webGLAdapterModule = new window.aui.nvr.WebAssemblyWebGLAdapter(
             buffer
           );
-          console.log("webGLAdapterModule", webGLAdapterModule);
+          webGLAdapterModule.onModuleEvent.subscribe(function (type, args) {
+            var eventType = args[0] || "";
+            switch (eventType) {
+              case "onRuntimeInitialized":
+                pvtWebGLAdapterModule = webGLAdapterModule;
+                initializeController();
+                break;
+              default:
+                break;
+            }
+          });
+          window.WebGLAdapterModule(webGLAdapterModule);
+          // console.log("webGLAdapterModule", webGLAdapterModule);
+          // console.log("streamFragment", streamFragment);
         });
     }
     fetchWebAssembly();
