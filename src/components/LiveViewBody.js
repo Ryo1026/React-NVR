@@ -1,9 +1,19 @@
 import React from "react";
-import { changeView } from "../actions/actionCreator";
+import {
+  changeView,
+  dbClickDevice,
+  toggleList,
+  dragDevice,
+} from "../actions/actionCreator";
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
-  return { view: state.view };
+  return {
+    listOpen: state.listOpen,
+    dbClickDevice: state.dbClickDevice,
+    view: state.view,
+    dragDevice: state.dragDevice,
+  };
 };
 
 const mapDispatchToProps = (dispatch) => {
@@ -11,14 +21,34 @@ const mapDispatchToProps = (dispatch) => {
     onViewChange: (view) => {
       dispatch(changeView(view));
     },
+    clearDbClickDevice: () => {
+      dispatch(dbClickDevice(null));
+    },
+    onToggleList: (boolean) => {
+      dispatch(toggleList(boolean));
+    },
+    clearDragDevice: () => {
+      dispatch(dragDevice(""));
+    },
   };
 };
 
 class LiveViewBodyUI extends React.Component {
+  constructor() {
+    super();
+    this.allControllers = [];
+    this.controllers = [];
+    this.usedControllers = [];
+    this.state = {
+      titleBarDisplay: false,
+      stretchToFit: true,
+      liveView: {},
+    };
+  }
   componentDidMount() {
+    let me = this;
     let streamFragment = null;
     let pvtWebGLAdapterModule = null;
-    let controllers = [];
     let init = false;
     function initializeController() {
       if (!init && streamFragment != null && pvtWebGLAdapterModule != null) {
@@ -28,7 +58,7 @@ class LiveViewBodyUI extends React.Component {
           fragObj.createWorker(
             streamFragment.URL_FRAGWORKER + "?v=" + new Date().getTime()
           );
-          controllers[i] = new window.aui.nvr.ui.WebAssemblyController({
+          const controller = new window.aui.nvr.ui.WebAssemblyController({
             object: fragObj,
             sessionKey: new Date().getTime(),
             events: [
@@ -49,40 +79,23 @@ class LiveViewBodyUI extends React.Component {
             ],
             id: mdlid,
           });
-          // controller.push(controller1);
-          controllers[i].setWebGLAdapter(pvtWebGLAdapterModule);
-          controllers[i].render(
-            document.getElementsByClassName(`window-No${i}`)[0]
-          );
-          controllers[i].setControlMode("live");
-          controllers[i].setConnectionSettings({
-            Mode: "0",
-            MountingType: "",
-            account: "admin",
-            cameraID: "1",
-            command: "",
-            fisheyeModule: "-1",
-            mode: "live",
-            mousePTZ: "1",
-            password: "123456",
-            printLog: "",
-            serverIP: "localhost",
-            serverPort: "80",
-            setChannel: "1",
-            streamID: "1",
-            stretchToFit: "true",
-          });
-          // controllers[i].connect();
-          // controllers[i].setWidth(
+          controller.setWebGLAdapter(pvtWebGLAdapterModule);
+          // controller.render(
+          //   document.getElementsByClassName(`window-No${i}`)[0]
+          // );
+          // controller.setControlMode("live");
+          controller.setConnectionSettings(me.setSettingParameter(1));
+          // controller.setWidth(
           //   document.getElementsByClassName(`window-No${i}`)[0].clientWidth
           // );
-          // controllers[i].setHeight(
+          // controller.setHeight(
           //   document.getElementsByClassName(`window-No${i}`)[0].clientHeight
           // );
+          me.controllers.push(controller);
           // controllers[i].setTitleBarDisplay(false);
         }
         init = true;
-        console.log(controllers);
+        me.allControllers = [...me.controllers];
       }
     }
     async function fetchWebAssembly() {
@@ -132,8 +145,70 @@ class LiveViewBodyUI extends React.Component {
     }
     fetchWebAssembly();
   }
+  componentDidUpdate() {
+    const { dbClickDevice, clearDbClickDevice } = this.props;
+    if (dbClickDevice != null) {
+      const controller = this.controllers.shift();
+      this.usedControllers.push(controller);
+      controller.connect();
+      clearDbClickDevice();
+      console.log(this.controllers);
+    }
+  }
+
+  setTitleBarDisplay() {
+    let me = this;
+    this.allControllers.forEach((element) => {
+      element.setTitleBarDisplay(me.state.titleBarDisplay);
+    });
+    this.setState({ titleBarDisplay: !this.state.titleBarDisplay });
+  }
+  setStretchToFit() {
+    let me = this;
+    this.allControllers.forEach((element) => {
+      element.setStretchToFit(me.state.titleBarDisplay);
+    });
+    this.setState({ stretchToFit: !this.state.stretchToFit });
+  }
+  DropConnect = (e) => {
+    console.log(e.target);
+    const controller = this.controllers.shift();
+
+    controller.connect();
+    controller.render(e.target);
+    controller.setWidth(e.target.clientWidth);
+    controller.setHeight(e.target.clientHeight);
+
+    this.usedControllers.push(controller);
+  };
+  setSettingParameter(cameraID) {
+    return {
+      Mode: "0",
+      MountingType: "",
+      account: "admin",
+      cameraID: `${cameraID}`,
+      command: "",
+      fisheyeModule: "-1",
+      mode: "live",
+      mousePTZ: "1",
+      password: "123456",
+      printLog: "",
+      serverIP: "localhost",
+      serverPort: "80",
+      setChannel: "1",
+      streamID: "1",
+      stretchToFit: "true",
+    };
+  }
   render() {
-    const { view, onViewChange } = this.props;
+    const {
+      listOpen,
+      view,
+      onViewChange,
+      onToggleList,
+      dragDevice,
+      clearDragDevice,
+    } = this.props;
     return (
       <div className="live-view-body">
         <div className="live-view-header">
@@ -176,39 +251,85 @@ class LiveViewBodyUI extends React.Component {
             </div>
           </div>
           <div className="control-bar-right">
-            <div className="settingGear"></div>
+            <div
+              className="settingGear"
+              onClick={() => {
+                onToggleList(true);
+              }}
+            ></div>
           </div>
         </div>
-        <div className="live-view-area">
+        <div
+          className="live-view-area"
+          onClick={() => {
+            onToggleList(false);
+          }}
+        >
           <div
             className={`nvr-window window-No0 ${view === "x1" ? "x1" : ""} ${
               view === "x4" ? "x4" : ""
             }`}
+            onMouseUp={(e) => {
+              if (dragDevice) {
+                this.DropConnect(e);
+                clearDragDevice();
+              }
+            }}
           ></div>
           <div
             className={`nvr-window window-No1 ${view === "x1" ? "x1" : ""} ${
               view === "x4" ? "x4" : ""
             }`}
+            onMouseUp={(e) => {
+              if (dragDevice) {
+                this.DropConnect(e);
+                clearDragDevice();
+              }
+            }}
           ></div>
           <div
             className={`nvr-window window-No2 ${view === "x1" ? "x1" : ""} ${
               view === "x4" ? "x4" : ""
             }`}
+            onMouseUp={(e) => {
+              if (dragDevice) {
+                this.DropConnect(e);
+                clearDragDevice();
+              }
+            }}
           ></div>
           <div
             className={`nvr-window window-No3 ${view === "x1" ? "x1" : ""} ${
               view === "x4" ? "x4" : ""
             }`}
+            onMouseUp={(e) => {
+              if (dragDevice) {
+                this.DropConnect(e);
+                clearDragDevice();
+              }
+            }}
           ></div>
           <div
             className={`nvr-window window-No4 ${view === "x1" ? "x1" : ""} ${
               view === "x4" ? "x4" : ""
             }`}
+            onMouseUp={(e) => {
+              if (dragDevice) {
+                this.DropConnect(e);
+                clearDragDevice();
+              }
+            }}
           ></div>
           <div
             className={`nvr-window window-No5 ${view === "x1" ? "x1" : ""} ${
               view === "x4" ? "x4" : ""
             }`}
+            onMouseUp={(e) => {
+              if (dragDevice) {
+                this.DropConnect(e);
+                clearDragDevice();
+              }
+            }}
           ></div>
         </div>
         <div className="live-view-footer">
@@ -216,6 +337,37 @@ class LiveViewBodyUI extends React.Component {
             <div className="volume-icon"></div>
             <div className="volume-block"></div>
           </div>
+        </div>
+        <div className={`control-list ${listOpen ? "list-Open" : ""}`}>
+          <li
+            className="list-item switch-stretch"
+            onClick={() => {
+              this.setStretchToFit();
+            }}
+          >
+            <div className="control-icon"></div>
+            <div className="control-text">伸展影像</div>
+          </li>
+          <li
+            className="list-item switch-title-display"
+            onClick={() => {
+              this.setTitleBarDisplay();
+            }}
+          >
+            <div className="control-icon"></div>
+            <div className="control-text">標題欄位</div>
+          </li>
+          <li
+            className="list-item disconnect-all"
+            onClick={() => {
+              for (let i = 0; i < this.allControllers.length; i++) {
+                this.allControllers[i].disconnect();
+              }
+            }}
+          >
+            <div className="control-icon"></div>
+            <div className="control-text">移除所有頻道</div>
+          </li>
         </div>
       </div>
     );

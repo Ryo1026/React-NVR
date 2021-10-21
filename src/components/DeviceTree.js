@@ -4,6 +4,7 @@ import {
   focusDeviceId,
   toggleFolder,
   dragDevice,
+  dbClickDevice,
 } from "../actions/actionCreator";
 import { connect } from "react-redux";
 
@@ -29,6 +30,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     onDeviceDrag: (deviceName) => {
       dispatch(dragDevice(deviceName));
+    },
+    onDbclickDevice: (id) => {
+      dispatch(dbClickDevice(id));
     },
   };
 };
@@ -92,6 +96,7 @@ class DeviceTreeUI extends React.Component {
       folderOpen,
       onToggleFolder,
       onDeviceDrag,
+      onDbclickDevice,
     } = this.props;
     async function getDataAndDispatch() {
       const requestURL = new Request(
@@ -163,6 +168,9 @@ class DeviceTreeUI extends React.Component {
                           onMouseDown={(e) => {
                             onDeviceDrag(`${i + 1} ${v.name}`);
                             this.dragEvent(e, onDeviceDrag);
+                          }}
+                          onDoubleClick={() => {
+                            onDbclickDevice(i);
                           }}
                         >
                           {i + 1 + " " + v.name}

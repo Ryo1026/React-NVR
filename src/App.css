@@ -271,6 +271,71 @@ li {
   background: url(./img/Options-ContextMenu-icon.png) -26px -570px;
 }
 
+.control-list {
+  width: 240px;
+  border: 1px solid rgb(90, 90, 90);
+  color: #d3d3d3;
+  font-size: 13px;
+  position: absolute;
+  top: 34px;
+  right: 0;
+  background: rgb(41, 41, 41);
+  display: none;
+  z-index: 2;
+}
+
+.list-Open {
+  display: block;
+}
+
+.list-item {
+  cursor: pointer;
+  display: flex;
+  height: 30px;
+  line-height: 30px;
+  padding-right: 15px;
+  border: 1px solid transparent;
+  margin: 2px;
+}
+
+.list-item:hover {
+  background: linear-gradient(rgb(116, 88, 46), rgb(108, 72, 34));
+  border: 1px solid rgb(220, 139, 73);
+}
+
+.control-icon {
+  padding-right: 2px;
+  border-right: 1px solid rgb(57, 57, 57);
+}
+
+.control-text {
+  padding-left: 2px;
+}
+
+.switch-stretch .control-icon {
+  width: 26px;
+  height: 30px;
+  background: url(./img/Options-ContextMenu-icon.png) 0 -690px;
+}
+
+.switch-title-display .control-icon {
+  width: 26px;
+  height: 30px;
+  background: url(./img/Options-ContextMenu-icon.png) 0 -330px;
+}
+
+.switch-mute .control-icon {
+  width: 26px;
+  height: 30px;
+  background: url(./img/Options-ContextMenu-icon.png) -200px -840px;
+}
+
+.disconnect-all .control-icon {
+  width: 26px;
+  height: 30px;
+  background: url(./img/Options-ContextMenu-icon.png) 0 -510px;
+}
+
 .live-view-area {
   display: flex;
   height: 100%;
@@ -303,6 +368,10 @@ li {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+.aui-nvr-ui-WebAssemblyController > div {
+  display: none;
 }
 
 .aui-nvr-ui-WebAssemblyController > video {
