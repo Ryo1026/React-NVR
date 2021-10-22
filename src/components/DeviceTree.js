@@ -145,6 +145,9 @@ class DeviceTreeUI extends React.Component {
                   onClick={() => {
                     onFocusDevice(-1);
                   }}
+                  onDoubleClick={() => {
+                    onDbclickDevice(0);
+                  }}
                 >
                   All Devices
                 </div>

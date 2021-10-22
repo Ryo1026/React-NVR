@@ -9,9 +9,9 @@ import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
-    listOpen: state.listOpen,
-    dbClickDevice: state.dbClickDevice,
     view: state.view,
+    dbClickDevice: state.dbClickDevice,
+    listOpen: state.listOpen,
     dragDevice: state.dragDevice,
   };
 };
@@ -39,10 +39,11 @@ class LiveViewBodyUI extends React.Component {
     this.allControllers = [];
     this.controllers = [];
     this.usedControllers = [];
+    this.liveView = [];
     this.state = {
       titleBarDisplay: false,
       stretchToFit: true,
-      liveView: {},
+      enableAudioIn: false,
     };
   }
   componentDidMount() {
@@ -80,19 +81,9 @@ class LiveViewBodyUI extends React.Component {
             id: mdlid,
           });
           controller.setWebGLAdapter(pvtWebGLAdapterModule);
-          // controller.render(
-          //   document.getElementsByClassName(`window-No${i}`)[0]
-          // );
           // controller.setControlMode("live");
           controller.setConnectionSettings(me.setSettingParameter(1));
-          // controller.setWidth(
-          //   document.getElementsByClassName(`window-No${i}`)[0].clientWidth
-          // );
-          // controller.setHeight(
-          //   document.getElementsByClassName(`window-No${i}`)[0].clientHeight
-          // );
           me.controllers.push(controller);
-          // controllers[i].setTitleBarDisplay(false);
         }
         init = true;
         me.allControllers = [...me.controllers];
@@ -151,8 +142,37 @@ class LiveViewBodyUI extends React.Component {
       const controller = this.controllers.shift();
       this.usedControllers.push(controller);
       controller.connect();
+
+      // 選出要用來放controller的nvr-window(空的)
+      const nvrWindows = document.getElementsByClassName("nvr-window");
+      let showdbclickView = null;
+      for (let i = 0; i < nvrWindows.length; i++) {
+        if (nvrWindows[i].childNodes[0] === undefined) {
+          showdbclickView = nvrWindows[i];
+          break;
+        }
+      }
+      controller.render(showdbclickView);
+      controller.setWidth(showdbclickView.clientWidth);
+      controller.setHeight(showdbclickView.clientHeight);
+      // console.log(showdbclickView);
+
+      // 儲存controller與對應的render window
+      this.liveView.push({
+        controller: controller,
+        nvrWindow: showdbclickView,
+      });
       clearDbClickDevice();
-      console.log(this.controllers);
+    }
+    // Rerender時 重新設定每個controller大小符合容器
+    for (let i = 0; i < this.liveView.length; i++) {
+      // console.log(this.liveView);
+      this.liveView[i].controller.setWidth(
+        this.liveView[i].nvrWindow.clientWidth
+      );
+      this.liveView[i].controller.setHeight(
+        this.liveView[i].nvrWindow.clientHeight
+      );
     }
   }
 
@@ -170,8 +190,15 @@ class LiveViewBodyUI extends React.Component {
     });
     this.setState({ stretchToFit: !this.state.stretchToFit });
   }
+  setEnableAudioIn() {
+    let me = this;
+    this.allControllers.forEach((element) => {
+      element.enableAudioIn(me.state.enableAudioIn);
+    });
+    this.setState({ enableAudioIn: !this.state.enableAudioIn });
+  }
   DropConnect = (e) => {
-    console.log(e.target);
+    // console.log(e.target);
     const controller = this.controllers.shift();
 
     controller.connect();
@@ -180,6 +207,11 @@ class LiveViewBodyUI extends React.Component {
     controller.setHeight(e.target.clientHeight);
 
     this.usedControllers.push(controller);
+
+    this.liveView.push({
+      controller: controller,
+      nvrWindow: e.target,
+    });
   };
   setSettingParameter(cameraID) {
     return {
@@ -334,7 +366,14 @@ class LiveViewBodyUI extends React.Component {
         </div>
         <div className="live-view-footer">
           <div className="volume-area">
-            <div className="volume-icon"></div>
+            <div
+              className={`volume-icon ${
+                this.state.enableAudioIn ? "" : "mute"
+              }`}
+              onClick={() => {
+                this.setEnableAudioIn();
+              }}
+            ></div>
             <div className="volume-block"></div>
           </div>
         </div>
@@ -360,9 +399,15 @@ class LiveViewBodyUI extends React.Component {
           <li
             className="list-item disconnect-all"
             onClick={() => {
-              for (let i = 0; i < this.allControllers.length; i++) {
-                this.allControllers[i].disconnect();
+              for (let i = 0; i < this.liveView.length; i++) {
+                this.liveView[i].nvrWindow.removeChild(
+                  this.liveView[i].nvrWindow.firstChild
+                );
+                this.liveView[i].controller.disconnect();
+                this.controllers.push(this.liveView[i].controller);
               }
+              this.usedControllers = [];
+              this.liveView = [];
             }}
           >
             <div className="control-icon"></div>
