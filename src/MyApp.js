@@ -4,6 +4,7 @@ import DeviceTree from "./components/DeviceTree";
 import DragDiv from "./components/DragDiv";
 import TitleBar from "./components/TitleBar";
 import LiveViewBody from "./components/LiveViewBody";
+import EventPanel from "./components/EventPanel";
 
 class MyApp extends React.Component {
   render() {
@@ -12,6 +13,7 @@ class MyApp extends React.Component {
         <div className="aui-container">
           <TitleBar />
           <DeviceTree />
+          <EventPanel />
         </div>
         <LiveViewBody />
         <DragDiv />

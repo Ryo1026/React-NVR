@@ -53,7 +53,7 @@ class DeviceTreeUI extends React.Component {
         .then((data) => {
           const parser = new DOMParser();
           const xml = parser.parseFromString(data, "application/xml");
-          // parse 為 DOM 物件可以使用內建的方法
+          // parse into DOM物件可以使用內建的方法 ex:xml.getElementsById()
           // console.log(xml.getElementsByTagName("Device"));
           const dispatchData = []; // 準備放 deviceList 的Array
           for (let i = 0; i < xml.getElementsByTagName("Device").length; i++) {

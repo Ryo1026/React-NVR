@@ -175,7 +175,6 @@ class LiveViewBodyUI extends React.Component {
       );
     }
   }
-
   setTitleBarDisplay() {
     let me = this;
     this.allControllers.forEach((element) => {
