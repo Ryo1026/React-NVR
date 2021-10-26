@@ -25,3 +25,10 @@ export function dragDevice(deviceName) {
 export function changeView(view) {
   return { type: "CHANGE_VIEW", view: view };
 }
+
+export function newEvent(evtId, time, deviceId) {
+  return {
+    type: "RECEIVED_EVENT",
+    newEvent: { evtId: evtId, time: time, deviceId: deviceId },
+  };
+}

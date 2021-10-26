@@ -1,11 +1,24 @@
 import React from "react";
+import { newEvent } from "../actions/actionCreator";
+import { connect } from "react-redux";
 
-class EventPanel extends React.Component {
-  constructor() {
-    super();
-    this.state = {};
-  }
+const mapStateToProps = (state) => {
+  return {
+    eventPanel: state.eventPanel,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onEventReceived: (evtId, time, deviceId) => {
+      dispatch(newEvent(evtId, time, deviceId));
+    },
+  };
+};
+
+class EventPanelUI extends React.Component {
   componentDidMount() {
+    const { onEventReceived } = this.props;
     const ws = new WebSocket("ws://localhost:80/Media/WebSocket");
     console.log(ws);
     ws.addEventListener("open", function () {
@@ -23,37 +36,57 @@ class EventPanel extends React.Component {
     ws.addEventListener("message", function (e) {
       const parser = new DOMParser();
       const xml = parser.parseFromString(e.data, "text/xml");
-      // const evt = xml
-      //   .getElementsByTagName("Message")[0]
-      //   .getElementsByTagName("Event")[0]
-      //   .getAttribute("id");
-      // switch (evt) {
-      //   case "Motion1":
-      //     console.log(evt);
-      //     break;
-      //   default:
-      //     break;
-      // }
+      // 注意 !
+      // message事件 第一次回傳的是連線成功的資訊，裡面沒有<Message>所以會報錯 undefined
+      // console.log("xml", xml);
+      const mes = xml.getElementsByTagName("Message")[0];
+      // console.log("mes", mes);
+      if (mes) {
+        const evtId = xml.getElementsByTagName("Event")[0].getAttribute("id");
+        // console.log("evtId", evtId);
+        switch (evtId) {
+          case "Motion1":
+            const timeString = xml
+              .getElementsByTagName("Message")[0]
+              .getAttribute("Time")
+              .replace(".", ""); // 取得事件時間 <Message>中的屬性
+            const time = new Date(parseInt(timeString)); // 轉整數
+            // Format時間 年/月/日 時:分:秒
+            const timeFormat = `${time.getFullYear()}/${
+              time.getMonth() + 1
+            }/${time.getDate()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+            // dispatch 新事件
+            onEventReceived(evtId, timeFormat, 1); // deviceId
+            break;
+          default:
+            break;
+        }
+      }
     });
   }
   render() {
+    const { eventPanel } = this.props;
     return (
       <div className="event-panel-body">
         <div className="event-panel-title">Event</div>
         <div className="event-panel-list">
-          {/* map */}
-          <div className="event-item">
-            <div className="event-info">
-              <div className="event-name">位移偵測 MD 1</div>
-              <div className="event-time">2021/10/26 00:00:00</div>
-              <div className="devicename">1 ACTi</div>
-            </div>
-            <div className="event-icon motion1"></div>
-          </div>
+          {eventPanel.map((v, i) => {
+            return (
+              <div className="event-item" key={i}>
+                <div className="event-info">
+                  <div className="event-name">{v.evtId}</div>
+                  <div className="event-time">{v.time}</div>
+                  <div className="devicename">1 ACTi</div>
+                </div>
+                <div className="event-icon motion1"></div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
   }
 }
 
+const EventPanel = connect(mapStateToProps, mapDispatchToProps)(EventPanelUI);
 export default EventPanel;

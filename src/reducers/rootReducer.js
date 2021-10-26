@@ -6,6 +6,7 @@ const initStore = {
   devicesInfo: [],
   dragDevice: "",
   view: "x1x5",
+  eventPanel: [],
 };
 
 const rootReducer = (state = initStore, action) => {
@@ -24,6 +25,13 @@ const rootReducer = (state = initStore, action) => {
       return { ...state, dragDevice: action.deviceName };
     case "CHANGE_VIEW":
       return { ...state, view: action.view };
+    case "RECEIVED_EVENT":
+      // console.log([...state.eventPanel].push(action.newEvent));
+      // 直接push會得到push這個方法return的值
+      return {
+        ...state,
+        eventPanel: [action.newEvent, ...state.eventPanel],
+      };
     default:
       return state;
   }
