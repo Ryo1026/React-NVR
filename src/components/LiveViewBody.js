@@ -2,6 +2,7 @@ import React from "react";
 import {
   changeView,
   dbClickDevice,
+  focusDeviceId,
   toggleList,
   dragDevice,
 } from "../actions/actionCreator";
@@ -13,6 +14,7 @@ const mapStateToProps = (state) => {
     dbClickDevice: state.dbClickDevice,
     listOpen: state.listOpen,
     dragDevice: state.dragDevice,
+    focusDeviceId: state.focusDeviceId,
   };
 };
 
@@ -30,16 +32,20 @@ const mapDispatchToProps = (dispatch) => {
     clearDragDevice: () => {
       dispatch(dragDevice(""));
     },
+    setFocusDeviceId: (deviceId) => {
+      dispatch(focusDeviceId(deviceId));
+    },
   };
 };
 
 class LiveViewBodyUI extends React.Component {
   constructor() {
     super();
-    this.allControllers = [];
-    this.controllers = [];
-    this.usedControllers = [];
-    this.liveView = [];
+    this.allControllers = []; // new出來的所有Controllers(不可變)
+    this.controllers = []; // 未使用的Controllers
+    this.usedControllers = []; // 使用中的Controllers
+    this.liveView = []; // 配對已連線的Controller與nvr-window div
+    this.allNvrWindow = [];
     this.state = {
       titleBarDisplay: false,
       stretchToFit: true,
@@ -135,9 +141,10 @@ class LiveViewBodyUI extends React.Component {
         });
     }
     fetchWebAssembly();
+    this.allNvrWindow = document.getElementsByClassName("nvr-window");
   }
   componentDidUpdate() {
-    const { dbClickDevice, clearDbClickDevice } = this.props;
+    const { dbClickDevice, clearDbClickDevice, focusDeviceId } = this.props;
     if (dbClickDevice != null) {
       const controller = this.controllers.shift();
       this.usedControllers.push(controller);
@@ -164,6 +171,11 @@ class LiveViewBodyUI extends React.Component {
       });
       clearDbClickDevice();
     }
+
+    for (let i = 0; i < this.allNvrWindow.length; i++) {
+      this.allNvrWindow[i].classList.remove("selected");
+    }
+
     // Rerender時 重新設定每個controller大小符合容器
     for (let i = 0; i < this.liveView.length; i++) {
       // console.log(this.liveView);
@@ -173,6 +185,11 @@ class LiveViewBodyUI extends React.Component {
       this.liveView[i].controller.setHeight(
         this.liveView[i].nvrWindow.clientHeight
       );
+      if (focusDeviceId === 0) {
+        this.liveView[i].nvrWindow.classList.add("selected");
+      } else {
+        this.liveView[i].nvrWindow.classList.remove("selected");
+      }
     }
   }
   setTitleBarDisplay() {
@@ -239,6 +256,7 @@ class LiveViewBodyUI extends React.Component {
       onToggleList,
       dragDevice,
       clearDragDevice,
+      setFocusDeviceId,
     } = this.props;
     return (
       <div className="live-view-body">
@@ -297,7 +315,7 @@ class LiveViewBodyUI extends React.Component {
           }}
         >
           <div
-            className={`nvr-window window-No0 ${view === "x1" ? "x1" : ""} ${
+            className={`nvr-window window-No0 ${view === "x1" ? "x1" : ""}${
               view === "x4" ? "x4" : ""
             }`}
             onMouseUp={(e) => {
@@ -306,9 +324,23 @@ class LiveViewBodyUI extends React.Component {
                 clearDragDevice();
               }
             }}
+            onClick={(e) => {
+              // 先判斷點到的是canvas還是nvrWindow
+              if (e.target.classList.length !== 0) {
+                // !==0 表示點到空的nvrWindow，移除所有點選狀態
+                for (let i = 0; i < this.allNvrWindow.length; i++) {
+                  this.allNvrWindow[i].classList.remove("selected");
+                }
+                e.target.classList.add("selected"); // 新增點選狀態
+                setFocusDeviceId(null); // 清空Focus狀態
+              } else {
+                // 點到canvas的情況
+                setFocusDeviceId(0);
+              }
+            }}
           ></div>
           <div
-            className={`nvr-window window-No1 ${view === "x1" ? "x1" : ""} ${
+            className={`nvr-window window-No1 ${view === "x1" ? "x1" : ""}${
               view === "x4" ? "x4" : ""
             }`}
             onMouseUp={(e) => {
@@ -317,9 +349,20 @@ class LiveViewBodyUI extends React.Component {
                 clearDragDevice();
               }
             }}
+            onClick={(e) => {
+              if (e.target.classList.length !== 0) {
+                for (let i = 0; i < this.allNvrWindow.length; i++) {
+                  this.allNvrWindow[i].classList.remove("selected");
+                }
+                e.target.classList.add("selected");
+                setFocusDeviceId(null);
+              } else {
+                setFocusDeviceId(0);
+              }
+            }}
           ></div>
           <div
-            className={`nvr-window window-No2 ${view === "x1" ? "x1" : ""} ${
+            className={`nvr-window window-No2 ${view === "x1" ? "x1" : ""}${
               view === "x4" ? "x4" : ""
             }`}
             onMouseUp={(e) => {
@@ -328,9 +371,20 @@ class LiveViewBodyUI extends React.Component {
                 clearDragDevice();
               }
             }}
+            onClick={(e) => {
+              if (e.target.classList.length !== 0) {
+                for (let i = 0; i < this.allNvrWindow.length; i++) {
+                  this.allNvrWindow[i].classList.remove("selected");
+                }
+                e.target.classList.add("selected");
+                setFocusDeviceId(null);
+              } else {
+                setFocusDeviceId(0);
+              }
+            }}
           ></div>
           <div
-            className={`nvr-window window-No3 ${view === "x1" ? "x1" : ""} ${
+            className={`nvr-window window-No3 ${view === "x1" ? "x1" : ""}${
               view === "x4" ? "x4" : ""
             }`}
             onMouseUp={(e) => {
@@ -339,9 +393,20 @@ class LiveViewBodyUI extends React.Component {
                 clearDragDevice();
               }
             }}
+            onClick={(e) => {
+              if (e.target.classList.length !== 0) {
+                for (let i = 0; i < this.allNvrWindow.length; i++) {
+                  this.allNvrWindow[i].classList.remove("selected");
+                }
+                e.target.classList.add("selected");
+                setFocusDeviceId(null);
+              } else {
+                setFocusDeviceId(0);
+              }
+            }}
           ></div>
           <div
-            className={`nvr-window window-No4 ${view === "x1" ? "x1" : ""} ${
+            className={`nvr-window window-No4 ${view === "x1" ? "x1" : ""}${
               view === "x4" ? "x4" : ""
             }`}
             onMouseUp={(e) => {
@@ -350,15 +415,37 @@ class LiveViewBodyUI extends React.Component {
                 clearDragDevice();
               }
             }}
+            onClick={(e) => {
+              if (e.target.classList.length !== 0) {
+                for (let i = 0; i < this.allNvrWindow.length; i++) {
+                  this.allNvrWindow[i].classList.remove("selected");
+                }
+                e.target.classList.add("selected");
+                setFocusDeviceId(null);
+              } else {
+                setFocusDeviceId(0);
+              }
+            }}
           ></div>
           <div
-            className={`nvr-window window-No5 ${view === "x1" ? "x1" : ""} ${
+            className={`nvr-window window-No5 ${view === "x1" ? "x1" : ""}${
               view === "x4" ? "x4" : ""
             }`}
             onMouseUp={(e) => {
               if (dragDevice) {
                 this.DropConnect(e);
                 clearDragDevice();
+              }
+            }}
+            onClick={(e) => {
+              if (e.target.classList.length !== 0) {
+                for (let i = 0; i < this.allNvrWindow.length; i++) {
+                  this.allNvrWindow[i].classList.remove("selected");
+                }
+                e.target.classList.add("selected");
+                setFocusDeviceId(null);
+              } else {
+                setFocusDeviceId(0);
               }
             }}
           ></div>
@@ -402,11 +489,13 @@ class LiveViewBodyUI extends React.Component {
                 this.liveView[i].nvrWindow.removeChild(
                   this.liveView[i].nvrWindow.firstChild
                 );
+                this.liveView[i].nvrWindow.classList.remove("selected");
                 this.liveView[i].controller.disconnect();
                 this.controllers.push(this.liveView[i].controller);
               }
               this.usedControllers = [];
               this.liveView = [];
+              setFocusDeviceId(null);
             }}
           >
             <div className="control-icon"></div>

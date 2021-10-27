@@ -28,10 +28,19 @@ const rootReducer = (state = initStore, action) => {
     case "RECEIVED_EVENT":
       // console.log([...state.eventPanel].push(action.newEvent));
       // 直接push會得到push這個方法return的值
-      return {
-        ...state,
-        eventPanel: [action.newEvent, ...state.eventPanel],
-      };
+      if (state.eventPanel.length < 300) {
+        return {
+          ...state,
+          eventPanel: [action.newEvent, ...state.eventPanel],
+        };
+      } else {
+        const limitEvtArr = [...state.eventPanel];
+        limitEvtArr.pop();
+        return {
+          ...state,
+          eventPanel: [action.newEvent, ...limitEvtArr],
+        };
+      }
     default:
       return state;
   }

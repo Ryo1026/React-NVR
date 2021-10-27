@@ -1,9 +1,10 @@
 import React from "react";
-import { newEvent } from "../actions/actionCreator";
+import { newEvent, focusDeviceId } from "../actions/actionCreator";
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
+    focusDeviceId: state.focusDeviceId,
     eventPanel: state.eventPanel,
   };
 };
@@ -13,6 +14,9 @@ const mapDispatchToProps = (dispatch) => {
     onEventReceived: (evtId, time, deviceId) => {
       dispatch(newEvent(evtId, time, deviceId));
     },
+    onFocusDevice: (deviceId) => {
+      dispatch(focusDeviceId(deviceId));
+    },
   };
 };
 
@@ -20,7 +24,7 @@ class EventPanelUI extends React.Component {
   componentDidMount() {
     const { onEventReceived } = this.props;
     const ws = new WebSocket("ws://localhost:80/Media/WebSocket");
-    console.log(ws);
+    // console.log(ws);
     ws.addEventListener("open", function () {
       console.log("websocket連線成功");
       ws.send(`<WebSocket>
@@ -65,16 +69,26 @@ class EventPanelUI extends React.Component {
     });
   }
   render() {
-    const { eventPanel } = this.props;
+    const { eventPanel, focusDeviceId, onFocusDevice } = this.props;
     return (
       <div className="event-panel-body">
         <div className="event-panel-title">Event</div>
         <div className="event-panel-list">
           {eventPanel.map((v, i) => {
             return (
-              <div className="event-item" key={i}>
+              <div
+                className={`event-item ${
+                  focusDeviceId === 0 ? "selected" : ""
+                }`}
+                key={i}
+                onClick={() => {
+                  onFocusDevice(0);
+                }}
+              >
                 <div className="event-info">
-                  <div className="event-name">{v.evtId}</div>
+                  <div className="event-name">
+                    {v.evtId === "Motion1" ? "MD 1" : ""}
+                  </div>
                   <div className="event-time">{v.time}</div>
                   <div className="devicename">1 ACTi</div>
                 </div>

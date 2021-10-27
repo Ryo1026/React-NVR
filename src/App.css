@@ -15,14 +15,6 @@ body {
   flex-direction: row;
   margin: 0;
   height: 100%;
-  scrollbar-base-color: #000;
-  scrollbar-face-color: rgb(53, 53, 53);
-  /* scrollbar-3dlight-color: #000; */
-  scrollbar-highlight-color: #000;
-  scrollbar-track-color: #000;
-  scrollbar-arrow-color: rgb(53, 53, 53);
-  scrollbar-shadow-color: #000;
-  /* scrollbar-dark-shadow-color: #000; */
 }
 
 iframe {
@@ -63,6 +55,7 @@ li {
   font-size: 13px;
   line-height: 32px;
   padding-left: 5px;
+  margin-right: -2px;
 }
 
 .aui-camera-channel-body {
@@ -71,6 +64,7 @@ li {
   color: white;
   background: black;
   min-height: 270px;
+  padding-right: 2px;
 }
 
 .aui-camera-channel-bar {
@@ -85,6 +79,7 @@ li {
   background: linear-gradient(rgb(98, 98, 98), rgb(45, 45, 45));
   padding: 2px 4px;
   height: 16px;
+  margin-right: -2px;
 }
 
 .aui-camera-channel-bar:hover {
@@ -507,6 +502,7 @@ li {
   flex-grow: 1;
   color: white;
   background: black;
+  padding-right: 2px;
   /* max-height: 389px; */
 }
 
@@ -522,6 +518,7 @@ li {
   background: linear-gradient(rgb(98, 98, 98), rgb(45, 45, 45));
   padding: 2px 4px;
   height: 16px;
+  margin-right: -2px;
 }
 
 .event-panel-title:hover {
@@ -530,10 +527,41 @@ li {
 
 .event-panel-list {
   margin-top: 5px;
-  overflow: hidden;
   overflow-x: hidden;
   overflow-y: auto;
-  max-height: 618px;
+  min-height: 320px;
+  max-height: 590px;
+}
+
+.event-panel-list::-webkit-scrollbar {
+  background: rgba(21, 21, 21, 1);
+  width: auto;
+}
+
+.event-panel-list::-webkit-scrollbar-thumb {
+  background-color: rgb(53, 53, 53);
+  border-radius: 1px;
+}
+
+.event-panel-list::-webkit-scrollbar-track {
+  background: rgba(21, 21, 21, 1);
+  margin: 20px 0;
+}
+
+.event-panel-list::-webkit-scrollbar-button {
+  background-color: rgba(21, 21, 21, 1);
+  border-style: solid;
+  height: 30px;
+}
+
+.event-panel-list::-webkit-scrollbar-button:vertical:decrement {
+  border-width: 0 8px 10px 8px;
+  border-color: transparent transparent rgb(53, 53, 53) transparent;
+}
+
+.event-panel-list::-webkit-scrollbar-button:vertical:increment {
+  border-width: 10px 8px 0 8px;
+  border-color: rgb(53, 53, 53) transparent transparent transparent;
 }
 
 .event-item {
@@ -569,15 +597,16 @@ li {
 }
 
 .event-name {
-  font-size: 13px;
+  font-size: 12px;
   color: rgb(255, 169, 68);
 }
 
 .event-time {
-  font-size: 13px;
+  font-size: 11px;
+  color: #d3d3d3;
   padding: 4px 0px 4px;
 }
 
 .devicename {
-  font-size: 13px;
+  font-size: 11px;
 }
