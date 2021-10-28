@@ -45,7 +45,7 @@ class LiveViewBodyUI extends React.Component {
     this.controllers = []; // 未使用的Controllers
     this.usedControllers = []; // 使用中的Controllers
     this.liveView = []; // 配對已連線的Controller與nvr-window div
-    this.allNvrWindow = [];
+    this.nvrWindows = [];
     this.state = {
       titleBarDisplay: false,
       stretchToFit: true,
@@ -57,6 +57,16 @@ class LiveViewBodyUI extends React.Component {
     let streamFragment = null;
     let pvtWebGLAdapterModule = null;
     let init = false;
+    //  Build nvrWindows 陣列
+    const windowArr = document.getElementsByClassName("nvr-window");
+    for (let i = 0; i < windowArr.length; i++) {
+      const perNvrWindow = {
+        window: windowArr[i],
+        focusState: false,
+        controllerId: null,
+      };
+      this.nvrWindows.push(perNvrWindow);
+    }
     function initializeController() {
       if (!init && streamFragment != null && pvtWebGLAdapterModule != null) {
         for (let i = 0; i < 6; i++) {
@@ -89,10 +99,14 @@ class LiveViewBodyUI extends React.Component {
           controller.setWebGLAdapter(pvtWebGLAdapterModule);
           // controller.setControlMode("live");
           controller.setConnectionSettings(me.setSettingParameter(1));
-          me.controllers.push(controller);
+          const controllerObj = {
+            id: mdlid,
+            controller: controller,
+            isUsing: false,
+          };
+          me.controllers.push(controllerObj);
         }
         init = true;
-        me.allControllers = [...me.controllers];
       }
     }
     async function fetchWebAssembly() {
@@ -141,7 +155,6 @@ class LiveViewBodyUI extends React.Component {
         });
     }
     fetchWebAssembly();
-    this.allNvrWindow = document.getElementsByClassName("nvr-window");
   }
   componentDidUpdate() {
     const {
@@ -151,35 +164,57 @@ class LiveViewBodyUI extends React.Component {
       focusDeviceId,
       onViewChange,
     } = this.props;
-    if (dbClickDevice != null && this.controllers.length !== 0) {
-      const controller = this.controllers.shift();
-      this.usedControllers.push(controller);
-      controller.connect();
 
-      // 選出要用來放controller的nvr-window(空的)
-      const nvrWindows = document.getElementsByClassName("nvr-window");
-      let showdbclickView = null;
-      for (let i = 0; i < nvrWindows.length; i++) {
-        if (nvrWindows[i].childNodes[0] === undefined) {
-          showdbclickView = nvrWindows[i];
+    if (dbClickDevice != null) {
+      for (let i = 0; i < this.controllers.length; i++) {
+        if (!this.controllers[i].isUsing) {
+          for (let j = 0; j < this.nvrWindows.length; j++) {
+            if (this.nvrWindows[j].controllerId === null) {
+              this.controllers[i].controller.connect();
+              this.controllers[i].controller.render(this.nvrWindows[j].window);
+              this.controllers[i].controller.setWidth(
+                this.nvrWindows[j].window.clientWidth
+              );
+              this.controllers[i].controller.setHeight(
+                this.nvrWindows[j].window.clientHeight
+              );
+              this.nvrWindows[j].controllerId = this.controllers[i].id;
+              break;
+            }
+          }
+          this.controllers[i].isUsing = true;
           break;
         }
       }
-      controller.render(showdbclickView);
-      controller.setWidth(showdbclickView.clientWidth);
-      controller.setHeight(showdbclickView.clientHeight);
-      // console.log(showdbclickView);
 
-      // 儲存controller與對應的render window
-      this.liveView.push({
-        controller: controller,
-        nvrWindow: showdbclickView,
-      });
+      // const controller = this.controllers.shift();
+      // this.usedControllers.push(controller);
+      // controller.connect();
+
+      // // 選出要用來放controller的nvr-window(空的)
+      // const nvrWindows = document.getElementsByClassName("nvr-window");
+      // let showdbclickView = null;
+      // for (let i = 0; i < nvrWindows.length; i++) {
+      //   if (nvrWindows[i].childNodes[0] === undefined) {
+      //     showdbclickView = nvrWindows[i];
+      //     break;
+      //   }
+      // }
+      // controller.render(showdbclickView);
+      // controller.setWidth(showdbclickView.clientWidth);
+      // controller.setHeight(showdbclickView.clientHeight);
+      // // console.log(showdbclickView);
+
+      // // 儲存controller與對應的render window
+      // this.liveView.push({
+      //   controller: controller,
+      //   nvrWindow: showdbclickView,
+      // });
       clearDbClickDevice();
     }
 
-    for (let i = 0; i < this.allNvrWindow.length; i++) {
-      this.allNvrWindow[i].classList.remove("selected");
+    for (let i = 0; i < this.nvrWindows.length; i++) {
+      this.nvrWindows[i].window.classList.remove("selected");
     }
 
     // Rerender時 重新設定每個controller大小符合容器
