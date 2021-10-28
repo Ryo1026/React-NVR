@@ -38,6 +38,12 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 class DeviceTreeUI extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      listOpen: true,
+    };
+  }
   componentDidMount() {
     const { onDataReceived } = this.props;
     async function getDataAndDispatch() {
@@ -126,8 +132,15 @@ class DeviceTreeUI extends React.Component {
     }
     return (
       <div className="aui-camera-channel-body">
-        <div className="aui-camera-channel-bar">Device</div>
-        <div className="aui-tree-area">
+        <div
+          className="aui-camera-channel-bar"
+          onClick={() => {
+            this.setState({ listOpen: !this.state.listOpen });
+          }}
+        >
+          Device
+        </div>
+        <div className={`aui-tree-area ${this.state.listOpen ? "" : "hide"}`}>
           <ul>
             <li className="tree-node layer-1">
               <div className="tree-node-main-node folder-layer">

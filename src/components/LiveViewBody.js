@@ -144,8 +144,14 @@ class LiveViewBodyUI extends React.Component {
     this.allNvrWindow = document.getElementsByClassName("nvr-window");
   }
   componentDidUpdate() {
-    const { dbClickDevice, clearDbClickDevice, focusDeviceId } = this.props;
-    if (dbClickDevice != null) {
+    const {
+      view,
+      dbClickDevice,
+      clearDbClickDevice,
+      focusDeviceId,
+      onViewChange,
+    } = this.props;
+    if (dbClickDevice != null && this.controllers.length !== 0) {
       const controller = this.controllers.shift();
       this.usedControllers.push(controller);
       controller.connect();
@@ -189,6 +195,23 @@ class LiveViewBodyUI extends React.Component {
         this.liveView[i].nvrWindow.classList.add("selected");
       } else {
         this.liveView[i].nvrWindow.classList.remove("selected");
+      }
+    }
+    // dbclick 超過 nowView上限，切換layout
+    if (view === "x1" && dbClickDevice != null) {
+      for (let i = 0; i < this.liveView.length; i++) {
+        if (this.liveView[i].nvrWindow.classList[1] === "window-No1") {
+          onViewChange("x4");
+          break;
+        }
+      }
+    }
+    if (view === "x4" && dbClickDevice != null) {
+      for (let i = 0; i < this.liveView.length; i++) {
+        if (this.liveView[i].nvrWindow.classList[1] === "window-No4") {
+          onViewChange("x1x5");
+          break;
+        }
       }
     }
   }

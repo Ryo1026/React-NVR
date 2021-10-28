@@ -14,6 +14,7 @@ class MyApp extends React.Component {
           <TitleBar />
           <DeviceTree />
           <EventPanel />
+          <div className="aui-tree-footer"></div>
         </div>
         <LiveViewBody />
         <DragDiv />

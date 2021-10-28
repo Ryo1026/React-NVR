@@ -21,6 +21,12 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 class EventPanelUI extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      listOpen: true,
+    };
+  }
   componentDidMount() {
     const { onEventReceived } = this.props;
     const ws = new WebSocket("ws://localhost:80/Media/WebSocket");
@@ -58,7 +64,19 @@ class EventPanelUI extends React.Component {
             // Format時間 年/月/日 時:分:秒
             const timeFormat = `${time.getFullYear()}/${
               time.getMonth() + 1
-            }/${time.getDate()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+            }/${time.getDate()} ${
+              time.getHours().toString().length === 1
+                ? "0" + time.getHours()
+                : time.getHours()
+            }:${
+              time.getMinutes().toString().length === 1
+                ? "0" + time.getMinutes()
+                : time.getMinutes()
+            }:${
+              time.getSeconds().toString().length === 1
+                ? "0" + time.getSeconds()
+                : time.getSeconds()
+            }`;
             // dispatch 新事件
             onEventReceived(evtId, timeFormat, 1); // deviceId
             break;
@@ -72,8 +90,17 @@ class EventPanelUI extends React.Component {
     const { eventPanel, focusDeviceId, onFocusDevice } = this.props;
     return (
       <div className="event-panel-body">
-        <div className="event-panel-title">Event</div>
-        <div className="event-panel-list">
+        <div
+          className="event-panel-title"
+          onClick={() => {
+            this.setState({ listOpen: !this.state.listOpen });
+          }}
+        >
+          Event
+        </div>
+        <div
+          className={`event-panel-list ${this.state.listOpen ? "" : "hide"}`}
+        >
           {eventPanel.map((v, i) => {
             return (
               <div

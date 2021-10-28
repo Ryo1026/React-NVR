@@ -63,7 +63,7 @@ li {
   width: 243px;
   color: white;
   background: black;
-  min-height: 270px;
+  /* min-height: 270px; */
   padding-right: 2px;
 }
 
@@ -87,7 +87,6 @@ li {
 }
 
 .aui-tree-area {
-  flex-grow: 1;
   min-height: 230px;
 }
 
@@ -499,7 +498,7 @@ li {
 .event-panel-body {
   user-select: none;
   -ms-user-select: none;
-  flex-grow: 1;
+  flex-grow: 0;
   color: white;
   background: black;
   padding-right: 2px;
@@ -529,7 +528,7 @@ li {
   margin-top: 5px;
   overflow-x: hidden;
   overflow-y: auto;
-  min-height: 320px;
+  min-height: 590px;
   max-height: 590px;
 }
 
@@ -609,4 +608,9 @@ li {
 
 .devicename {
   font-size: 11px;
+}
+
+.aui-tree-footer {
+  height: 20px;
+  background: url(./img/footer.png);
 }
