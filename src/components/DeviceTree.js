@@ -131,7 +131,11 @@ class DeviceTreeUI extends React.Component {
         });
     }
     return (
-      <div className="aui-camera-channel-body">
+      <div
+        className={`aui-camera-channel-body ${
+          this.state.listOpen ? "" : "flexGrow0"
+        }`}
+      >
         <div
           className="aui-camera-channel-bar"
           onClick={() => {

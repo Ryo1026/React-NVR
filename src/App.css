@@ -46,6 +46,7 @@ li {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: #000;
 }
 
 .aui-titlebar {
@@ -63,8 +64,14 @@ li {
   width: 243px;
   color: white;
   background: black;
-  /* min-height: 270px; */
+  min-height: 442.5px;
+  max-height: 100%;
   padding-right: 2px;
+}
+
+.aui-camera-channel-body.flexGrow0 {
+  flex-grow: 0;
+  min-height: 0px;
 }
 
 .aui-camera-channel-bar {
@@ -498,11 +505,19 @@ li {
 .event-panel-body {
   user-select: none;
   -ms-user-select: none;
-  flex-grow: 0;
+  overflow-y: hidden;
+  flex-grow: 1;
   color: white;
   background: black;
   padding-right: 2px;
   /* max-height: 389px; */
+  min-height: 442.5px;
+  max-height: 100%;
+}
+
+.event-panel-body.flexGrow0 {
+  flex-grow: 0;
+  min-height: 0px;
 }
 
 .event-panel-title {
@@ -528,8 +543,8 @@ li {
   margin-top: 5px;
   overflow-x: hidden;
   overflow-y: auto;
-  min-height: 590px;
-  max-height: 590px;
+  /* min-height: 590px; */
+  max-height: 417.5px;
 }
 
 .event-panel-list::-webkit-scrollbar {

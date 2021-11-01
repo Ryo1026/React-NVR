@@ -89,7 +89,9 @@ class EventPanelUI extends React.Component {
   render() {
     const { eventPanel, focusDeviceId, onFocusDevice } = this.props;
     return (
-      <div className="event-panel-body">
+      <div
+        className={`event-panel-body ${this.state.listOpen ? "" : "flexGrow0"}`}
+      >
         <div
           className="event-panel-title"
           onClick={() => {
