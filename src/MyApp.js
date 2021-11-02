@@ -8,15 +8,26 @@ import EventPanel from "./components/EventPanel";
 
 class MyApp extends React.Component {
   render() {
+    const onSelectedDevice = new window.aui.lang.Delegate(
+      "onSelectedDevice",
+      this
+    );
+    let isDraging = false;
     return (
       <div className="myApp">
         <div className="aui-container">
           <TitleBar />
-          <DeviceTree />
+          <DeviceTree
+            onSelectedDevice={onSelectedDevice}
+            isDraging={isDraging}
+          />
           <EventPanel />
           <div className="aui-tree-footer"></div>
         </div>
-        <LiveViewBody />
+        <LiveViewBody
+          onSelectedDevice={onSelectedDevice}
+          isDraging={isDraging}
+        />
         <DragDiv />
       </div>
     );

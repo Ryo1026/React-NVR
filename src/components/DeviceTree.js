@@ -3,17 +3,14 @@ import {
   getDevices,
   focusDeviceId,
   toggleFolder,
-  dragDevice,
-  dbClickDevice,
 } from "../actions/actionCreator";
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
-    folderOpen: state.folderOpen,
-    focusDeviceId: state.focusDeviceId,
     devicesInfo: state.devicesInfo,
-    dragDevice: state.dragDevice,
+    focusDeviceId: state.focusDeviceId,
+    folderOpen: state.folderOpen,
   };
 };
 
@@ -28,12 +25,6 @@ const mapDispatchToProps = (dispatch) => {
     onToggleFolder: () => {
       dispatch(toggleFolder());
     },
-    onDeviceDrag: (deviceName) => {
-      dispatch(dragDevice(deviceName));
-    },
-    onDbclickDevice: (id) => {
-      dispatch(dbClickDevice(id));
-    },
   };
 };
 
@@ -45,42 +36,44 @@ class DeviceTreeUI extends React.Component {
     };
   }
   componentDidMount() {
-    const { onDataReceived } = this.props;
-    async function getDataAndDispatch() {
-      const requestURL = new Request(
-        "http://localhost:80/Media/Device/getDevice"
-      );
-      await fetch(requestURL, {
-        headers: new Headers({
-          Authorization: "Basic " + btoa("admin:123456"),
-        }),
-      })
-        .then((res) => res.text())
-        .then((data) => {
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(data, "application/xml");
-          // parse into DOM物件可以使用內建的方法 ex:xml.getElementsById()
-          // console.log(xml.getElementsByTagName("Device"));
-          const dispatchData = []; // 準備放 deviceList 的Array
-          for (let i = 0; i < xml.getElementsByTagName("Device").length; i++) {
-            // 擷取回傳的資料中需要的部分，並包裝成obj再放入redux中
-            const obj = {
-              id: i,
-              name: xml
-                .getElementsByTagName("Device")
-                [i].getElementsByTagName("Name")[0].innerHTML,
-            };
-            dispatchData.push(obj); // 逐個放入device
-          }
-          onDataReceived(dispatchData); // 整個 deviceList Array dispatch 到 Redux
-        });
-    }
-    getDataAndDispatch();
+    this.getDataAndDispatch();
   }
-  dragEvent = (e, onDeviceDrag) => {
+  getDataAndDispatch = async function () {
+    const { onDataReceived } = this.props;
+    const requestURL = new Request(
+      "http://localhost:80/Media/Device/getDevice"
+    );
+    await fetch(requestURL, {
+      headers: new Headers({
+        Authorization: "Basic " + btoa("admin:123456"),
+      }),
+    })
+      .then((res) => res.text())
+      .then((data) => {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data, "application/xml");
+        // parse into DOM物件可以使用內建的方法 ex:xml.getElementsById()
+        // console.log(xml.getElementsByTagName("Device"));
+        const dispatchData = []; // 準備放 deviceList 的Array
+        for (let i = 0; i < xml.getElementsByTagName("Device").length; i++) {
+          // 擷取回傳的資料中需要的部分，並包裝成obj再放入redux中
+          const obj = {
+            id: i + 1,
+            name: xml
+              .getElementsByTagName("Device")
+              [i].getElementsByTagName("Name")[0].innerHTML,
+          };
+          dispatchData.push(obj); // 逐個放入device
+        }
+        onDataReceived(dispatchData); // 整個 deviceList Array dispatch 到 Redux
+      });
+  };
+  dragEvent = (e, isDraging) => {
     const dragDiv = document.getElementById("dragDiv");
+    dragDiv.classList.remove("hidden");
     dragDiv.style.top = e.clientY + 5 + "px";
     dragDiv.style.left = e.clientX + 5 + "px";
+    isDraging = true;
     const mouseMoveEvent = function (e) {
       dragDiv.style.top = e.clientY + 5 + "px";
       dragDiv.style.left = e.clientX + 5 + "px";
@@ -88,7 +81,8 @@ class DeviceTreeUI extends React.Component {
     const mouseUpEvent = function () {
       document.body.removeEventListener("mousemove", mouseMoveEvent);
       document.body.removeEventListener("mouseup", mouseUpEvent);
-      onDeviceDrag("");
+      dragDiv.classList.add("hidden");
+      isDraging = false;
     };
     document.body.addEventListener("mousemove", mouseMoveEvent);
     document.body.addEventListener("mouseup", mouseUpEvent);
@@ -96,40 +90,13 @@ class DeviceTreeUI extends React.Component {
   render() {
     const {
       devicesInfo,
-      onDataReceived,
       focusDeviceId,
       onFocusDevice,
       folderOpen,
       onToggleFolder,
-      onDeviceDrag,
-      onDbclickDevice,
+      onSelectedDevice,
+      isDraging,
     } = this.props;
-    async function getDataAndDispatch() {
-      const requestURL = new Request(
-        "http://localhost:80/Media/Device/getDevice"
-      );
-      await fetch(requestURL, {
-        headers: new Headers({
-          Authorization: "Basic " + btoa("admin:123456"),
-        }),
-      })
-        .then((res) => res.text())
-        .then((data) => {
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(data, "application/xml");
-          const dispatchData = [];
-          for (let i = 0; i < xml.getElementsByTagName("Device").length; i++) {
-            const obj = {
-              id: i,
-              name: xml
-                .getElementsByTagName("Device")
-                [i].getElementsByTagName("Name")[0].innerHTML,
-            };
-            dispatchData.push(obj);
-          }
-          onDataReceived(dispatchData);
-        });
-    }
     return (
       <div
         className={`aui-camera-channel-body ${
@@ -162,9 +129,6 @@ class DeviceTreeUI extends React.Component {
                   onClick={() => {
                     onFocusDevice(-1);
                   }}
-                  onDoubleClick={() => {
-                    onDbclickDevice(0);
-                  }}
                 >
                   All Devices
                 </div>
@@ -186,14 +150,14 @@ class DeviceTreeUI extends React.Component {
                             onFocusDevice(i);
                           }}
                           onMouseDown={(e) => {
-                            onDeviceDrag(`${i + 1} ${v.name}`);
-                            this.dragEvent(e, onDeviceDrag);
+                            this.dragEvent(e, isDraging);
+                            onSelectedDevice.fire(1, "Drag");
                           }}
                           onDoubleClick={() => {
-                            onDbclickDevice(i);
+                            onSelectedDevice.fire(1, "Dbclick");
                           }}
                         >
-                          {i + 1 + " " + v.name}
+                          {v.id + " " + v.name}
                         </div>
                       </div>
                     );
@@ -205,7 +169,7 @@ class DeviceTreeUI extends React.Component {
           <div className="get-data-btn">
             <button
               onClick={() => {
-                getDataAndDispatch();
+                this.getDataAndDispatch();
               }}
             >
               Get Devices

@@ -41,9 +41,7 @@ const mapDispatchToProps = (dispatch) => {
 class LiveViewBodyUI extends React.Component {
   constructor() {
     super();
-    this.controllers = []; // 未使用的Controllers
-    this.usedControllers = []; // 使用中的Controllers
-    this.liveView = []; // 配對已連線的Controller與nvr-window div
+    this.controllers = [];
     this.nvrWindows = [];
     this.state = {
       titleBarDisplay: false,
@@ -52,6 +50,7 @@ class LiveViewBodyUI extends React.Component {
     };
   }
   componentDidMount() {
+    const { onSelectedDevice } = this.props;
     let me = this;
     let streamFragment = null;
     let pvtWebGLAdapterModule = null;
@@ -154,6 +153,9 @@ class LiveViewBodyUI extends React.Component {
         });
     }
     fetchWebAssembly();
+    onSelectedDevice.subscribe(function (type, args) {
+      console.log(args);
+    });
   }
   componentDidUpdate() {
     const {
@@ -556,16 +558,20 @@ class LiveViewBodyUI extends React.Component {
           <li
             className="list-item disconnect-all"
             onClick={() => {
-              for (let i = 0; i < this.liveView.length; i++) {
-                this.liveView[i].nvrWindow.removeChild(
-                  this.liveView[i].nvrWindow.firstChild
-                );
-                this.liveView[i].nvrWindow.classList.remove("selected");
-                this.liveView[i].controller.disconnect();
-                this.controllers.push(this.liveView[i].controller);
+              for (let i = 0; i < this.nvrWindows.length; i++) {
+                if (this.nvrWindows[i].controllerId != null) {
+                  this.nvrWindows[i].window.removeChild(
+                    this.nvrWindows[i].window.firstChild
+                  );
+                }
+                this.nvrWindows[i].window.classList.remove("selected");
+                this.nvrWindows[i].focusState = false;
+                this.nvrWindows[i].controllerId = null;
               }
-              this.usedControllers = [];
-              this.liveView = [];
+              for (let i = 0; i < this.controllers.length; i++) {
+                this.controllers[i].controller.disconnect();
+                this.controllers[i].isUsing = false;
+              }
               setFocusDeviceId(null);
               onToggleList(false);
             }}
