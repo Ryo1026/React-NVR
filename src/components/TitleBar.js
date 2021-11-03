@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 const mapStateToProps = (state) => {
   return {
     focusDeviceId: state.focusDeviceId,
-    devicesInfo: state.devicesInfo[state.focusDeviceId],
+    devicesInfo: state.devicesInfo[state.focusDeviceId - 1],
   };
 };
 
@@ -17,9 +17,7 @@ class TitleBarUI extends React.Component {
       return <div className="aui-titlebar"></div>;
     } else {
       return (
-        <div className="aui-titlebar">{`${focusDeviceId + 1} ${
-          devicesInfo.name
-        }`}</div>
+        <div className="aui-titlebar">{`${focusDeviceId} ${devicesInfo.name}`}</div>
       );
     }
   }

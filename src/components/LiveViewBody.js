@@ -1,19 +1,16 @@
 import React from "react";
 import {
   changeView,
-  dbClickDevice,
   focusDeviceId,
   toggleList,
-  dragDevice,
 } from "../actions/actionCreator";
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
     view: state.view,
-    dbClickDevice: state.dbClickDevice,
     listOpen: state.listOpen,
-    dragDevice: state.dragDevice,
+    dragState: state.dragState,
     focusDeviceId: state.focusDeviceId,
   };
 };
@@ -23,14 +20,8 @@ const mapDispatchToProps = (dispatch) => {
     onViewChange: (view) => {
       dispatch(changeView(view));
     },
-    clearDbClickDevice: () => {
-      dispatch(dbClickDevice(null));
-    },
     onToggleList: (boolean) => {
       dispatch(toggleList(boolean));
-    },
-    clearDragDevice: () => {
-      dispatch(dragDevice(""));
     },
     setFocusDeviceId: (deviceId) => {
       dispatch(focusDeviceId(deviceId));
@@ -49,8 +40,13 @@ class LiveViewBodyUI extends React.Component {
       enableAudioIn: false,
     };
   }
+  getCurrentViewState = () => {
+    // 取得當前view的狀態，提供onSelectedDevice.subscribe判斷
+    const { view } = this.props;
+    return view;
+  };
   componentDidMount() {
-    const { onSelectedDevice } = this.props;
+    const { onSelectedDevice, onViewChange } = this.props;
     let me = this;
     let streamFragment = null;
     let pvtWebGLAdapterModule = null;
@@ -64,6 +60,7 @@ class LiveViewBodyUI extends React.Component {
         controllerId: null,
       };
       this.nvrWindows.push(perNvrWindow);
+      this.setState({ viewState: this.nvrWindows });
     }
     function initializeController() {
       if (!init && streamFragment != null && pvtWebGLAdapterModule != null) {
@@ -153,64 +150,58 @@ class LiveViewBodyUI extends React.Component {
         });
     }
     fetchWebAssembly();
-    onSelectedDevice.subscribe(function (type, args) {
-      console.log(args);
-    });
-  }
-  componentDidUpdate() {
-    const {
-      view,
-      dbClickDevice,
-      clearDbClickDevice,
-      focusDeviceId,
-      onViewChange,
-    } = this.props;
 
     // dbclick 觸發controller連線並render到nvrWindow
-    if (dbClickDevice != null) {
-      for (let i = 0; i < this.controllers.length; i++) {
+    onSelectedDevice.subscribe(function (type, args) {
+      // 取得當前的 viewState 因為這裡是 componentDidMount 的範圍，直接用參數傳入會有錯
+      const currentView = me.getCurrentViewState();
+      for (let i = 0; i < me.controllers.length; i++) {
         // 挑出未使用的controller
-        if (!this.controllers[i].isUsing) {
-          for (let j = 0; j < this.nvrWindows.length; j++) {
+        if (!me.controllers[i].isUsing) {
+          for (let j = 0; j < me.nvrWindows.length; j++) {
             // 挑出未使用的 nvrWindow
-            if (this.nvrWindows[j].controllerId === null) {
-              this.controllers[i].controller.connect();
-              this.controllers[i].controller.render(this.nvrWindows[j].window);
-              this.controllers[i].controller.setWidth(
-                this.nvrWindows[j].window.clientWidth
+            if (me.nvrWindows[j].controllerId === null) {
+              me.controllers[i].controller.connect();
+              me.controllers[i].controller.render(me.nvrWindows[j].window);
+              me.controllers[i].controller.setWidth(
+                me.nvrWindows[j].window.clientWidth
               );
-              this.controllers[i].controller.setHeight(
-                this.nvrWindows[j].window.clientHeight
+              me.controllers[i].controller.setHeight(
+                me.nvrWindows[j].window.clientHeight
               );
               // 切換Layout
-              if (view === "x1" && this.nvrWindows[0].controllerId) {
+              if (currentView === "x1" && me.nvrWindows[0].controllerId) {
                 onViewChange("x4");
               } else if (
-                view === "x1" &&
-                this.nvrWindows[j].window.classList[1] === "window-No1"
+                currentView === "x1" &&
+                me.nvrWindows[j].window.classList[1] === "window-No1"
               ) {
                 onViewChange("x4");
               }
-              if (view === "x4" && this.nvrWindows[3].controllerId) {
+              if (currentView === "x4" && me.nvrWindows[3].controllerId) {
                 onViewChange("x1x5");
               } else if (
-                view === "x4" &&
-                this.nvrWindows[j].window.classList[1] === "window-No4"
+                currentView === "x4" &&
+                me.nvrWindows[j].window.classList[1] === "window-No4"
               ) {
                 onViewChange("x1x5");
               }
               // 儲存 controller的Id 到 nvrWindow
-              this.nvrWindows[j].controllerId = this.controllers[i].id;
+              me.nvrWindows[j].controllerId = me.controllers[i].id;
+              me.nvrWindows[j].focusState = true;
+              me.nvrWindows[j].window.classList.add("selected");
               break;
             }
           }
           // 設定 controller 狀態為使用中
-          this.controllers[i].isUsing = true;
+          me.controllers[i].isUsing = true;
           break;
         }
       }
-      clearDbClickDevice();
-    }
+    });
+  }
+  componentDidUpdate() {
+    const { focusDeviceId } = this.props;
 
     for (let i = 0; i < this.nvrWindows.length; i++) {
       if (this.nvrWindows[i].focusState) {
@@ -236,7 +227,7 @@ class LiveViewBodyUI extends React.Component {
       }
     }
     switch (focusDeviceId) {
-      case 0:
+      case 1:
         this.nvrWindows.forEach((element) => {
           if (element.controllerId !== null) {
             element.window.classList.add("selected");
@@ -321,10 +312,17 @@ class LiveViewBodyUI extends React.Component {
       view,
       onViewChange,
       onToggleList,
-      dragDevice,
-      clearDragDevice,
       setFocusDeviceId,
+      dragState,
     } = this.props;
+    const AllView = [
+      "window-No0",
+      "window-No1",
+      "window-No2",
+      "window-No3",
+      "window-No4",
+      "window-No5",
+    ];
     return (
       <div className="live-view-body">
         <div className="live-view-header">
@@ -381,141 +379,35 @@ class LiveViewBodyUI extends React.Component {
             onToggleList(false);
           }}
         >
-          <div
-            className={`nvr-window window-No0 ${view === "x1" ? "x1" : ""}${
-              view === "x4" ? "x4" : ""
-            }`}
-            onMouseUp={(e) => {
-              if (dragDevice) {
-                this.DropConnect(e);
-                clearDragDevice();
-              }
-            }}
-            onClick={(e) => {
-              // 先判斷點到的是canvas還是nvrWindow
-              if (e.target.classList.length !== 0) {
-                // !==0 表示點到空的nvrWindow，移除所有點選狀態
-                for (let i = 0; i < this.nvrWindows.length; i++) {
-                  this.nvrWindows[i].window.classList.remove("selected");
-                }
-                e.target.classList.add("selected"); // 新增點選狀態
-                setFocusDeviceId(null); // 清空Focus狀態
-              } else {
-                // 點到canvas的情況
-                setFocusDeviceId(0);
-              }
-            }}
-          ></div>
-          <div
-            className={`nvr-window window-No1 ${view === "x1" ? "x1" : ""}${
-              view === "x4" ? "x4" : ""
-            }`}
-            onMouseUp={(e) => {
-              if (dragDevice) {
-                this.DropConnect(e);
-                clearDragDevice();
-              }
-            }}
-            onClick={(e) => {
-              if (e.target.classList.length !== 0) {
-                for (let i = 0; i < this.nvrWindows.length; i++) {
-                  this.nvrWindows[i].window.classList.remove("selected");
-                }
-                e.target.classList.add("selected");
-                setFocusDeviceId(null);
-              } else {
-                setFocusDeviceId(0);
-              }
-            }}
-          ></div>
-          <div
-            className={`nvr-window window-No2 ${view === "x1" ? "x1" : ""}${
-              view === "x4" ? "x4" : ""
-            }`}
-            onMouseUp={(e) => {
-              if (dragDevice) {
-                this.DropConnect(e);
-                clearDragDevice();
-              }
-            }}
-            onClick={(e) => {
-              if (e.target.classList.length !== 0) {
-                for (let i = 0; i < this.nvrWindows.length; i++) {
-                  this.nvrWindows[i].window.classList.remove("selected");
-                }
-                e.target.classList.add("selected");
-                setFocusDeviceId(null);
-              } else {
-                setFocusDeviceId(0);
-              }
-            }}
-          ></div>
-          <div
-            className={`nvr-window window-No3 ${view === "x1" ? "x1" : ""}${
-              view === "x4" ? "x4" : ""
-            }`}
-            onMouseUp={(e) => {
-              if (dragDevice) {
-                this.DropConnect(e);
-                clearDragDevice();
-              }
-            }}
-            onClick={(e) => {
-              if (e.target.classList.length !== 0) {
-                for (let i = 0; i < this.nvrWindows.length; i++) {
-                  this.nvrWindows[i].window.classList.remove("selected");
-                }
-                e.target.classList.add("selected");
-                setFocusDeviceId(null);
-              } else {
-                setFocusDeviceId(0);
-              }
-            }}
-          ></div>
-          <div
-            className={`nvr-window window-No4 ${view === "x1" ? "x1" : ""}${
-              view === "x4" ? "x4" : ""
-            }`}
-            onMouseUp={(e) => {
-              if (dragDevice) {
-                this.DropConnect(e);
-                clearDragDevice();
-              }
-            }}
-            onClick={(e) => {
-              if (e.target.classList.length !== 0) {
-                for (let i = 0; i < this.nvrWindows.length; i++) {
-                  this.nvrWindows[i].window.classList.remove("selected");
-                }
-                e.target.classList.add("selected");
-                setFocusDeviceId(null);
-              } else {
-                setFocusDeviceId(0);
-              }
-            }}
-          ></div>
-          <div
-            className={`nvr-window window-No5 ${view === "x1" ? "x1" : ""}${
-              view === "x4" ? "x4" : ""
-            }`}
-            onMouseUp={(e) => {
-              if (dragDevice) {
-                this.DropConnect(e);
-                clearDragDevice();
-              }
-            }}
-            onClick={(e) => {
-              if (e.target.classList.length !== 0) {
-                for (let i = 0; i < this.nvrWindows.length; i++) {
-                  this.nvrWindows[i].window.classList.remove("selected");
-                }
-                e.target.classList.add("selected");
-                setFocusDeviceId(null);
-              } else {
-                setFocusDeviceId(0);
-              }
-            }}
-          ></div>
+          {AllView.map((v, i) => {
+            return (
+              <div
+                key={i}
+                className={`nvr-window ${v} ${view === "x1" ? "x1" : ""}${
+                  view === "x4" ? "x4" : ""
+                }`}
+                onMouseUp={(e) => {
+                  if (dragState) {
+                    this.DropConnect(e);
+                  }
+                }}
+                onClick={(e) => {
+                  // 判斷點到的是canvas還是nvrWindow
+                  if (e.target.classList.length !== 0) {
+                    // !==0 表示點到空的nvrWindow，移除所有點選狀態
+                    for (let i = 0; i < this.nvrWindows.length; i++) {
+                      this.nvrWindows[i].window.classList.remove("selected");
+                      this.nvrWindows[i].focusState = false;
+                    }
+                    e.target.classList.add("selected"); // 新增點選狀態
+                    setFocusDeviceId(null); // 清空Focus狀態
+                  } else {
+                    setFocusDeviceId(1); // 點到canvas的情況
+                  }
+                }}
+              ></div>
+            );
+          })}
         </div>
         <div className="live-view-footer">
           <div className="volume-area">

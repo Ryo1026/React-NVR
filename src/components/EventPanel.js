@@ -107,11 +107,11 @@ class EventPanelUI extends React.Component {
             return (
               <div
                 className={`event-item ${
-                  focusDeviceId === 0 ? "selected" : ""
+                  focusDeviceId === v.deviceId ? "selected" : ""
                 }`}
                 key={i}
                 onClick={() => {
-                  onFocusDevice(0);
+                  onFocusDevice(v.deviceId);
                 }}
               >
                 <div className="event-info">

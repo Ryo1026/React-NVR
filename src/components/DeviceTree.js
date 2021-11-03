@@ -3,6 +3,7 @@ import {
   getDevices,
   focusDeviceId,
   toggleFolder,
+  toggleDragState,
 } from "../actions/actionCreator";
 import { connect } from "react-redux";
 
@@ -24,6 +25,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     onToggleFolder: () => {
       dispatch(toggleFolder());
+    },
+    onDraging: (boolean) => {
+      dispatch(toggleDragState(boolean));
     },
   };
 };
@@ -68,12 +72,14 @@ class DeviceTreeUI extends React.Component {
         onDataReceived(dispatchData); // 整個 deviceList Array dispatch 到 Redux
       });
   };
-  dragEvent = (e, isDraging) => {
+  dragEvent = (e) => {
+    const { onDraging } = this.props;
     const dragDiv = document.getElementById("dragDiv");
     dragDiv.classList.remove("hidden");
     dragDiv.style.top = e.clientY + 5 + "px";
     dragDiv.style.left = e.clientX + 5 + "px";
-    isDraging = true;
+    dragDiv.innerText = e.target.innerText;
+    onDraging(true);
     const mouseMoveEvent = function (e) {
       dragDiv.style.top = e.clientY + 5 + "px";
       dragDiv.style.left = e.clientX + 5 + "px";
@@ -82,7 +88,7 @@ class DeviceTreeUI extends React.Component {
       document.body.removeEventListener("mousemove", mouseMoveEvent);
       document.body.removeEventListener("mouseup", mouseUpEvent);
       dragDiv.classList.add("hidden");
-      isDraging = false;
+      onDraging(false);
     };
     document.body.addEventListener("mousemove", mouseMoveEvent);
     document.body.addEventListener("mouseup", mouseUpEvent);
@@ -95,7 +101,6 @@ class DeviceTreeUI extends React.Component {
       folderOpen,
       onToggleFolder,
       onSelectedDevice,
-      isDraging,
     } = this.props;
     return (
       <div
@@ -144,17 +149,16 @@ class DeviceTreeUI extends React.Component {
                         <div className="node-icon camera-icon"></div>
                         <div
                           className={`node-text ${
-                            focusDeviceId === i ? "selected" : ""
+                            focusDeviceId === v.id ? "selected" : ""
                           }`}
                           onClick={() => {
-                            onFocusDevice(i);
+                            onFocusDevice(v.id);
                           }}
                           onMouseDown={(e) => {
-                            this.dragEvent(e, isDraging);
-                            onSelectedDevice.fire(1, "Drag");
+                            this.dragEvent(e);
                           }}
                           onDoubleClick={() => {
-                            onSelectedDevice.fire(1, "Dbclick");
+                            onSelectedDevice.fire(v.id);
                           }}
                         >
                           {v.id + " " + v.name}

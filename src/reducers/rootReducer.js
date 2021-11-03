@@ -2,11 +2,10 @@ const initStore = {
   folderOpen: true,
   listOpen: false,
   focusDeviceId: null,
-  dbClickDevice: null,
   devicesInfo: [],
-  dragDevice: "",
-  view: "x1x5",
   eventPanel: [],
+  view: "x1x5",
+  dragState: false,
 };
 
 const rootReducer = (state = initStore, action) => {
@@ -17,12 +16,10 @@ const rootReducer = (state = initStore, action) => {
       return { ...state, listOpen: action.listOpen };
     case "FOCUS":
       return { ...state, focusDeviceId: action.deviceId };
-    case "DBCLICK_DEVICE":
-      return { ...state, dbClickDevice: action.deviceId };
     case "GET_DEVICES":
       return { ...state, devicesInfo: action.devicesInfo };
-    case "DRAG_DEVICE":
-      return { ...state, dragDevice: action.deviceName };
+    case "DRAG":
+      return { ...state, dragState: action.dragState };
     case "CHANGE_VIEW":
       return { ...state, view: action.view };
     case "RECEIVED_EVENT":

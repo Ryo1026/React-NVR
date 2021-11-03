@@ -12,22 +12,15 @@ class MyApp extends React.Component {
       "onSelectedDevice",
       this
     );
-    let isDraging = false;
     return (
       <div className="myApp">
         <div className="aui-container">
           <TitleBar />
-          <DeviceTree
-            onSelectedDevice={onSelectedDevice}
-            isDraging={isDraging}
-          />
+          <DeviceTree onSelectedDevice={onSelectedDevice} />
           <EventPanel />
           <div className="aui-tree-footer"></div>
         </div>
-        <LiveViewBody
-          onSelectedDevice={onSelectedDevice}
-          isDraging={isDraging}
-        />
+        <LiveViewBody onSelectedDevice={onSelectedDevice} />
         <DragDiv />
       </div>
     );
