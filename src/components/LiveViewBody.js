@@ -46,10 +46,6 @@ class LiveViewBodyUI extends React.Component {
     return view;
   };
   componentDidMount() {
-    const viewArea = document.getElementsByClassName("nvr-window")[0];
-    viewArea.addEventListener("resize", function () {
-      console.log(123);
-    });
     const { onSelectedDevice, onViewChange } = this.props;
     let me = this;
     let streamFragment = null;
@@ -386,6 +382,15 @@ class LiveViewBodyUI extends React.Component {
                 className={`nvr-window ${v} ${view === "x1" ? "x1" : ""}${
                   view === "x4" ? "x4" : ""
                 }`}
+                // 測試功能(未完成)
+                onMouseOver={(e) => {
+                  if (dragState) {
+                    for (let i = 0; i < this.nvrWindows.length; i++) {
+                      this.nvrWindows[i].window.classList.remove("selected");
+                    }
+                    e.target.classList.add("selected");
+                  }
+                }}
                 onMouseUp={(e) => {
                   if (dragState) {
                     this.DropConnect(e);
