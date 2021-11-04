@@ -46,6 +46,10 @@ class LiveViewBodyUI extends React.Component {
     return view;
   };
   componentDidMount() {
+    const viewArea = document.getElementsByClassName("nvr-window")[0];
+    viewArea.addEventListener("resize", function () {
+      console.log(123);
+    });
     const { onSelectedDevice, onViewChange } = this.props;
     let me = this;
     let streamFragment = null;
@@ -172,17 +176,13 @@ class LiveViewBodyUI extends React.Component {
               // 切換Layout
               if (currentView === "x1" && me.nvrWindows[0].controllerId) {
                 onViewChange("x4");
-              } else if (
-                currentView === "x1" &&
-                me.nvrWindows[j].window.classList[1] === "window-No1"
-              ) {
-                onViewChange("x4");
               }
-              if (currentView === "x4" && me.nvrWindows[3].controllerId) {
-                onViewChange("x1x5");
-              } else if (
+              if (
                 currentView === "x4" &&
-                me.nvrWindows[j].window.classList[1] === "window-No4"
+                me.nvrWindows[0].controllerId &&
+                me.nvrWindows[1].controllerId &&
+                me.nvrWindows[2].controllerId &&
+                me.nvrWindows[3].controllerId
               ) {
                 onViewChange("x1x5");
               }
@@ -389,6 +389,7 @@ class LiveViewBodyUI extends React.Component {
                 onMouseUp={(e) => {
                   if (dragState) {
                     this.DropConnect(e);
+                    setFocusDeviceId(1);
                   }
                 }}
                 onClick={(e) => {
@@ -399,8 +400,10 @@ class LiveViewBodyUI extends React.Component {
                       this.nvrWindows[i].window.classList.remove("selected");
                       this.nvrWindows[i].focusState = false;
                     }
-                    e.target.classList.add("selected"); // 新增點選狀態
                     setFocusDeviceId(null); // 清空Focus狀態
+                    setTimeout(() => {
+                      e.target.classList.add("selected");
+                    }, 1);
                   } else {
                     setFocusDeviceId(1); // 點到canvas的情況
                   }
